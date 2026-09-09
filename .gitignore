@@ -1,0 +1,55 @@
+# =============================================================================
+# PaymentPulse — .gitignore
+# =============================================================================
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Environment / secrets — NEVER commit these
+.env
+*.env
+
+# Data files — raw data is generated locally, not committed
+data/raw/
+data/processed/
+data/quarantine/
+data/*.duckdb
+data/*.duckdb.wal
+
+# Logs
+logs/
+*.log
+
+# Test / coverage artefacts
+.pytest_cache/
+.coverage
+htmlcov/
+.ruff_cache/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Notebooks — output cells can contain generated data
+*.ipynb_checkpoints/

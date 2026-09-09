@@ -1,0 +1,117 @@
+# PaymentPulse — Configuration
+# All thresholds and parameters are here. Override via environment variables where noted.
+
+dataset:
+  num_transactions: 75000        # Total synthetic transactions to generate
+  num_customers: 500             # Unique customers
+  num_merchants: 100             # Unique merchants
+  random_seed: 42                # Reproducibility seed
+
+# Injected data-quality problems (fraction of total records, e.g. 0.005 = 0.5%)
+dq_injection:
+  null_customer_id: 0.005        # Null customer_id
+  null_amount: 0.003             # Null amount
+  duplicate_transaction_id: 0.008 # Duplicate transaction IDs
+  invalid_currency: 0.004        # Non-ISO currency code
+  invalid_status: 0.003          # Unexpected status value
+  orphan_customer_id: 0.005      # customer_id not in customers table
+  orphan_merchant_id: 0.004      # merchant_id not in merchants table
+  malformed_timestamp: 0.003     # Unparseable timestamp string
+  future_timestamp: 0.002        # Timestamp > now
+  negative_amount: 0.003         # amount <= 0
+
+paths:
+  raw_dir: data/raw
+  processed_dir: data/processed
+  quarantine_dir: data/quarantine
+  db_path: data/paymentpulse.duckdb
+
+ingestion:
+  schema_version: "1.0"
+  expected_columns:
+    - transaction_id
+    - customer_id
+    - merchant_id
+    - payment_method
+    - timestamp
+    - amount
+    - currency
+    - country
+    - channel
+    - device_type
+    - status
+
+controls:
+  max_transaction_amount: 1000000   # CTL-03: amount ceiling (GBP)
+  freshness_sla_hours: 24           # CTL-05: pipeline freshness SLA
+  volume_anomaly_threshold: 0.30    # CTL-07: ±30% vs baseline
+
+dq_thresholds:
+  warn_failure_rate: 0.01           # WARN if >1% records fail a check
+  fail_failure_rate: 0.05           # FAIL if >5% records fail a check
+
+payment_methods:
+  - credit_card
+  - debit_card
+  - bank_transfer
+  - digital_wallet
+  - buy_now_pay_later
+  - direct_debit
+  - standing_order
+  - faster_payments
+
+valid_statuses:
+  - INITIATED
+  - SUCCESS
+  - FAILED
+  - PENDING
+  - REVERSED
+
+valid_currencies:
+  - GBP
+  - USD
+  - EUR
+  - AUD
+  - CAD
+  - JPY
+  - CHF
+  - HKD
+  - SGD
+  - INR
+
+channels:
+  - online
+  - mobile
+  - branch
+  - atm
+  - pos
+
+device_types:
+  - desktop
+  - mobile
+  - tablet
+  - unknown
+
+customer_segments:
+  - retail
+  - premium
+  - business
+  - student
+  - private_banking
+
+merchant_categories:
+  - retail
+  - food_and_beverage
+  - travel
+  - healthcare
+  - utilities
+  - entertainment
+  - financial_services
+  - ecommerce
+  - education
+  - real_estate
+
+merchant_risk_categories:
+  - low
+  - medium
+  - high
