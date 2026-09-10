@@ -114,23 +114,33 @@ PaymentPulse implements seven binary financial data controls (CTL-01 through CTL
 > $\mathbf{\text{Unaccounted Delta}} = 75,000 - (72,053 + 2,947) = \mathbf{0}$. No records are silently dropped.
 
 ---
-
 ## 6. Real Execution Results (Measured Locally)
 
-*All figures reflect actual execution from local run `batch_id=f5c5aeb3-4bba-49bd-89ec-027f46617cea`.*
+All figures below reflect an actual successful local pipeline execution.
 
-- **Total Ingested:** 75,000 transactions
-- **Silver Promotion Rate:** 96.07% (72,053 records)
-- **Quarantine Rate:** 3.93% (2,947 records quarantined due to injected defects)
-- **Data Quality Score:** **100.0 / 100.0** (all 14 validation checks passed on curated Silver layer)
-- **Data Controls Passed:** 7 of 7 controls passed (100% compliance)
-- **Total Pipeline Execution Time:** 15.82 seconds
+* **Total Ingested:** 75,000 transactions
+* **Silver Promotion Rate:** 96.07% (72,053 records)
+* **Quarantine Rate:** 3.93% (2,947 records)
+* **Data Quality Score:** 100.0 / 100.0 (14/14 validation checks passed)
+* **Data Controls:** 7/7 controls passed
+* **Gold Fact Rows:** 72,053
+* **Pipeline Execution Time:** 7.61 seconds
 
-### Top Quarantined Defects
-1. `null customer_id`: 366 records
-2. `unparseable amount`: 221 records
-3. `invalid status ('UNKNOWN', 'CANCELLED', 'ERR')`: 139 records
-4. `orphan merchant_id` / `orphan customer_id`: 78 records
+### Reconciliation Proof
+
+```text
+Raw Ingested   = 75,000
+Silver Clean   = 72,053
+Quarantine     = 2,947
+Unaccounted    = 75,000 - (72,053 + 2,947) = 0
+```
+
+No records were silently dropped during the pipeline.
+
+### Automated Testing
+
+The project includes **52 passing pytest tests** covering data generation, ingestion, data quality, controls, warehouse processing, and risk scoring.
+
 
 ---
 
@@ -180,6 +190,19 @@ The curated warehouse database will be available at `data/paymentpulse.duckdb` a
 
 ---
 
+## 8. Risk & Anomaly Analytics
+
+PaymentPulse includes a transaction-level anomaly risk layer built on the curated Silver dataset.
+
+* Engineers behavioral features such as transaction amount, customer-level amount baseline, transaction frequency, merchant failure rate, time-of-day, weekend activity, and country mismatch.
+* Uses an **Isolation Forest** model to identify unusual transaction behavior.
+* Calibrates anomaly scores to a **0–100 risk score** with configurable Low / Medium / High policy tiers.
+* Generates human-readable risk explanations based on the transaction characteristics contributing to elevated risk.
+* Persists risk outputs for downstream analytical use.
+
+This component demonstrates how the curated payments warehouse can support both operational analytics and transaction-risk analysis.
+
+
 ## 9. Alignment with Barclays Data Analyst Role
 
 | Barclays JD Requirement | Evidence in PaymentPulse (Tier 1) |
@@ -188,8 +211,8 @@ The curated warehouse database will be available at `data/paymentpulse.duckdb` a
 | **SQL & Dimensional Modeling** | ANSI-standard Star Schema (`fact_transactions`, `dim_customer`, `dim_merchant`, etc.) with 10 business analytics queries. |
 | **Payments Domain Expertise** | Complete payment lifecycle modeling (INITIATED, SUCCESS, FAILED, PENDING, REVERSED), payment rail segmentation, and risk metrics. |
 | **Data Quality & Governance** | 14-point DQ framework with PASS/WARN/FAIL scoring and 7 financial-grade data controls with zero-delta reconciliation. |
-| **Testing & SDLC** | 50 passing pytest tests, clean ruff linting, structured UTC logging, and comprehensive documentation (`docs/`). |
-| **Cloud / Target Architecture** | Production-ready Snowflake/Databricks target architecture documented with clear local vs. cloud separation. |
+| **Testing & SDLC** | 52 passing pytest tests, clean ruff linting, structured UTC logging, and comprehensive documentation (`docs/`). |
+| **Cloud / Target Architecture** | Documented Snowflake/Databricks target architecture documented with clear local vs. cloud separation. |
 
 ---
 
