@@ -1,11 +1,5 @@
 # PaymentPulse — End-to-End Payments Analytics, Data Quality & Controls Platform
 
-> **Portfolio Project:** Demonstrating engineering and analytical capabilities aligned with the **Barclays Data Analyst** role.  
-> **Status:** Tier 1 Complete, Tested, and Interview-Defensible.  
-> **Execution Status:** **Executed locally** on Windows 11 (Python 3.13, DuckDB, pandas).  
-> **Target Cloud Architecture:** Documented target architecture for AWS S3, Databricks (PySpark), Snowflake, and dbt.
-
----
 
 ## 1. Problem & Business Objective
 
