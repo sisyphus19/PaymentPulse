@@ -190,7 +190,7 @@ The curated warehouse database will be available at `data/paymentpulse.duckdb` a
 
 ---
 
-## 8. Risk & Anomaly Analytics
+## 9. Risk & Anomaly Analytics
 
 PaymentPulse includes a transaction-level anomaly risk layer built on the curated Silver dataset.
 
@@ -203,7 +203,7 @@ PaymentPulse includes a transaction-level anomaly risk layer built on the curate
 This component demonstrates how the curated payments warehouse can support both operational analytics and transaction-risk analysis.
 
 
-## 9. Alignment with Barclays Data Analyst Role
+## 10. Alignment with Barclays Data Analyst Role
 
 | Barclays JD Requirement | Evidence in PaymentPulse (Tier 1) |
 |---|---|
@@ -216,7 +216,7 @@ This component demonstrates how the curated payments warehouse can support both 
 
 ---
 
-## 10. Repository Documentation Index
+## 11. Repository Documentation Index
 
 - [`docs/requirements.md`](file:///C:/Users/ATHARV/.gemini/antigravity/scratch/paymentpulse/docs/requirements.md): Stakeholder specifications (FR-01 through FR-06).
 - [`docs/domain_model.md`](file:///C:/Users/ATHARV/.gemini/antigravity/scratch/paymentpulse/docs/domain_model.md): Entity relationship diagram and payment state lifecycle.
