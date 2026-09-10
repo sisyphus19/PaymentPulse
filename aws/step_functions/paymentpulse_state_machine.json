@@ -1,0 +1,28 @@
+{
+  "Comment": "PaymentPulse reference orchestration: ingest -> validate -> train -> deploy/notify",
+  "StartAt": "ValidateData",
+  "States": {
+    "ValidateData": {
+      "Type": "Task",
+      "Resource": "${VALIDATION_LAMBDA_ARN}",
+      "Next": "ValidationGate",
+      "Retry": [{"ErrorEquals": ["Lambda.ServiceException", "Lambda.TooManyRequestsException"], "MaxAttempts": 2, "BackoffRate": 2.0, "IntervalSeconds": 2}]
+    },
+    "ValidationGate": {
+      "Type": "Choice",
+      "Choices": [{"Variable": "$.approved", "BooleanEquals": true, "Next": "StartSageMakerPipeline"}],
+      "Default": "DataRejected"
+    },
+    "StartSageMakerPipeline": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::aws-sdk:sagemaker:startPipelineExecution",
+      "Parameters": {"PipelineName": "paymentpulse-mlops"},
+      "End": true
+    },
+    "DataRejected": {
+      "Type": "Fail",
+      "Error": "DataQualityGateFailed",
+      "Cause": "Batch failed PaymentPulse data quality/control policy"
+    }
+  }
+}

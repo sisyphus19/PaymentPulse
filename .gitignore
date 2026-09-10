@@ -53,3 +53,8 @@ Thumbs.db
 
 # Notebooks — output cells can contain generated data
 *.ipynb_checkpoints/
+
+# MLOps generated artifacts
+artifacts/
+mlops/artifacts/
+

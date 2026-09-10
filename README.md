@@ -49,18 +49,28 @@ Modern payment institutions process tens of millions of financial transactions d
               │           (fact_transactions, dims) │
               └──────────────────┬──────────────────┘
                                  │
-                 ┌───────────────┼───────────────┐
-                 ▼               ▼               ▼
-           DATA QUALITY    DATA CONTROLS   SQL ANALYTICS
-           (14 Checks)     (7 Controls)    (10 Queries)
+          ┌──────────────────────┼──────────────────────┐
+          ▼                      ▼                      ▼
+    DATA QUALITY           DATA CONTROLS         SQL ANALYTICS
+    (14 Checks)            (7 Controls)          (10 Queries)
+                                 │
+                                 ▼
+                       RISK / MLOPS LAYER
+                  Isolation Forest + Monitoring
 ```
 
 ### Target Production Architecture (Design Specification)
 
 ```
-AWS S3 (Raw Landing) ──► Databricks (PySpark Bronze/Silver) ──► Snowflake (Gold Star Schema via dbt) ──► Power BI
+AWS S3 ──► Step Functions / Lambda validation ──► SageMaker Processing / Training
+                                      │
+                                      ├──► MLflow model lineage / registry
+                                      ├──► SageMaker Model / Endpoint
+                                      └──► CloudWatch monitoring / alarms
+
+Analytics target: curated outputs can feed Snowflake/dbt or other enterprise analytical stores.
 ```
-*Note: As per Tier 0 non-negotiable ground rules, cloud infrastructure is documented as the target design and was not executed.*
+*Note: AWS resources are documented as a production target design; they were not deployed for this portfolio project.*
 
 ---
 
@@ -72,7 +82,12 @@ AWS S3 (Raw Landing) ──► Databricks (PySpark Bronze/Silver) ──► Snow
 | **DuckDB** | Local Analytical Warehouse | Chosen over Postgres/SQLite because it is an in-process, column-oriented OLAP engine supporting full ANSI SQL, window functions, and Parquet/CSV scanning with zero daemon configuration. Porting to Snowflake requires no query rewrites. |
 | **pandas** | Data Ingestion & Transformation | Vectorized batch transformations and schema conformance. (PySpark deferred to Tier 2 to eliminate JVM overhead on local environments). |
 | **Faker** | Data Generation | Deterministic, seed-controlled generation of realistic financial entities across global geographies. |
-| **pytest & ruff** | Quality & Linting | Modern, high-performance testing and linting suite guaranteeing reproducible code hygiene. |
+| **pytest & ruff** | Quality & Linting | Automated tests and linting used in local development and CI. |
+| **scikit-learn** | Risk model | Isolation Forest anomaly detection with calibrated transaction risk scores. |
+| **MLflow** | MLOps | Optional experiment tracking and model artifact logging; enabled with the `mlops` extra. |
+| **Docker** | Packaging | Reproducible container image for pipeline execution. |
+| **GitHub Actions** | CI/CD | Automated lint + test workflow on pushes and pull requests. |
+| **AWS SageMaker / Step Functions / Lambda / CloudWatch** | Production target | Reference implementation and architecture; not deployed in the portfolio environment. |
 
 ---
 
@@ -114,39 +129,23 @@ PaymentPulse implements seven binary financial data controls (CTL-01 through CTL
 > $\mathbf{\text{Unaccounted Delta}} = 75,000 - (72,053 + 2,947) = \mathbf{0}$. No records are silently dropped.
 
 ---
+
 ## 6. Real Execution Results (Measured Locally)
 
-All figures below reflect an actual successful local pipeline execution.
+*Core figures below reflect an actual successful local pipeline execution on 2026-09-10.*
 
-* **Total Ingested:** 75,000 transactions
-* **Silver Promotion Rate:** 96.07% (72,053 records)
-* **Quarantine Rate:** 3.93% (2,947 records)
-* **Data Quality Score:** 100.0 / 100.0 (14/14 validation checks passed)
-* **Data Controls:** 7/7 controls passed
-* **Gold Fact Rows:** 72,053
-* **Pipeline Execution Time:** 7.61 seconds
-
-### Reconciliation Proof
-
-```text
-Raw Ingested   = 75,000
-Silver Clean   = 72,053
-Quarantine     = 2,947
-Unaccounted    = 75,000 - (72,053 + 2,947) = 0
-```
-
-No records were silently dropped during the pipeline.
-
-### Automated Testing
-
-The project includes **52 passing pytest tests** covering data generation, ingestion, data quality, controls, warehouse processing, and risk scoring.
-
+- **Total Ingested:** 75,000 transactions
+- **Silver Promotion Rate:** 96.07% (72,053 records)
+- **Quarantine Rate:** 3.93% (2,947 records quarantined due to injected defects)
+- **Data Quality Score:** **100.0 / 100.0** (all 14 validation checks passed on curated Silver layer)
+- **Data Controls Passed:** 7 of 7 controls passed (100% compliance)
+- **Core pipeline execution time:** 7.61 seconds
 
 ---
 
 ## 7. SQL Analytics Suite
 
-Located in [`sql/analytics/analytics.sql`](file:///C:/Users/ATHARV/.gemini/antigravity/scratch/paymentpulse/sql/analytics/analytics.sql), all 10 queries answer concrete operational questions against the Gold dimensional model:
+Located in [`sql/analytics/analytics.sql`](sql/analytics/analytics.sql), all 10 queries answer concrete operational questions against the Gold dimensional model:
 
 1. **Daily Volume & Value**: Tracks daily GBP payment totals and transaction velocity.
 2. **Success & Failure Rates**: Calculates terminal lifecycle distribution across the enterprise.
@@ -161,7 +160,23 @@ Located in [`sql/analytics/analytics.sql`](file:///C:/Users/ATHARV/.gemini/antig
 
 ---
 
-## 8. Local Setup & Reproduction
+## 8. MLOps & AWS Production Design
+
+PaymentPulse now includes an operational ML lifecycle around the transaction-risk model:
+
+- **Training:** `mlops/train.py` reuses the production feature engineering and Isolation Forest implementation.
+- **Experiment tracking:** optional MLflow logging of parameters, operational metrics, metadata, and model artifacts.
+- **Deployment gate:** `mlops/validate.py` checks model metadata, feature schema, training volume, and risk-distribution guardrails.
+- **Monitoring:** `mlops/monitor.py` calculates PSI-based feature drift signals.
+- **Packaging:** Docker image for reproducible execution.
+- **CI/CD:** GitHub Actions runs linting and the automated test suite.
+- **AWS target:** SageMaker Pipelines, S3, Lambda, Step Functions and CloudWatch are represented in `aws/` and `docs/mlops_aws_architecture.md`.
+
+The AWS components are **reference architecture/code, not deployed infrastructure**. This distinction is intentional so the project demonstrates MLOps design without overstating cloud experience.
+
+See [`mlops/README.md`](mlops/README.md) and [`docs/mlops_aws_architecture.md`](docs/mlops_aws_architecture.md) for the lifecycle and deployment design.
+
+## 9. Local Setup & Reproduction
 
 ### Prerequisites
 - Python 3.11+ (Tested on Python 3.13)
@@ -176,7 +191,7 @@ cd paymentpulse
 # 2. Install dependencies (editable mode)
 pip install -e .
 
-# 3. Run the complete pipeline (Generate -> Ingest -> Warehouse -> DQ -> Controls)
+# 3. Run the complete pipeline (Generate -> Ingest -> Warehouse -> DQ -> Controls -> Risk scoring)
 python pipelines/run_pipeline.py
 
 # 4. Run the automated test suite
@@ -186,24 +201,13 @@ python -m pytest tests/ -v
 python -m ruff check src/ tests/
 ```
 
-The curated warehouse database will be available at `data/paymentpulse.duckdb` and can be queried using any DuckDB client or Python script.
+The curated warehouse database will be available at `data/paymentpulse.duckdb`. The pipeline also writes transaction risk results to `gold.fact_transactions_risk`.
+
+For MLOps training/validation, see `mlops/README.md`.
 
 ---
 
-## 9. Risk & Anomaly Analytics
-
-PaymentPulse includes a transaction-level anomaly risk layer built on the curated Silver dataset.
-
-* Engineers behavioral features such as transaction amount, customer-level amount baseline, transaction frequency, merchant failure rate, time-of-day, weekend activity, and country mismatch.
-* Uses an **Isolation Forest** model to identify unusual transaction behavior.
-* Calibrates anomaly scores to a **0–100 risk score** with configurable Low / Medium / High policy tiers.
-* Generates human-readable risk explanations based on the transaction characteristics contributing to elevated risk.
-* Persists risk outputs for downstream analytical use.
-
-This component demonstrates how the curated payments warehouse can support both operational analytics and transaction-risk analysis.
-
-
-## 10. Alignment with Barclays Data Analyst Role
+## 10. Alignment with Barclays / MLOps & Data Quality Roles
 
 | Barclays JD Requirement | Evidence in PaymentPulse (Tier 1) |
 |---|---|
@@ -212,15 +216,16 @@ This component demonstrates how the curated payments warehouse can support both 
 | **Payments Domain Expertise** | Complete payment lifecycle modeling (INITIATED, SUCCESS, FAILED, PENDING, REVERSED), payment rail segmentation, and risk metrics. |
 | **Data Quality & Governance** | 14-point DQ framework with PASS/WARN/FAIL scoring and 7 financial-grade data controls with zero-delta reconciliation. |
 | **Testing & SDLC** | 52 passing pytest tests, clean ruff linting, structured UTC logging, and comprehensive documentation (`docs/`). |
-| **Cloud / Target Architecture** | Documented Snowflake/Databricks target architecture documented with clear local vs. cloud separation. |
+| **Cloud / MLOps Target Architecture** | AWS S3, SageMaker Pipelines/Training, Step Functions, Lambda and CloudWatch design artifacts; local execution remains cloud-independent. |
+| **ML Lifecycle** | Isolation Forest risk model, MLflow tracking, deployment validation gate, Docker packaging, CI workflow, and PSI-based drift monitoring. |
 
 ---
 
 ## 11. Repository Documentation Index
 
-- [`docs/requirements.md`](file:///C:/Users/ATHARV/.gemini/antigravity/scratch/paymentpulse/docs/requirements.md): Stakeholder specifications (FR-01 through FR-06).
-- [`docs/domain_model.md`](file:///C:/Users/ATHARV/.gemini/antigravity/scratch/paymentpulse/docs/domain_model.md): Entity relationship diagram and payment state lifecycle.
-- [`docs/data_dictionary.md`](file:///C:/Users/ATHARV/.gemini/antigravity/scratch/paymentpulse/docs/data_dictionary.md): Comprehensive schema dictionary across Bronze, Silver, and Gold.
-- [`docs/data_controls.md`](file:///C:/Users/ATHARV/.gemini/antigravity/scratch/paymentpulse/docs/data_controls.md): Detailed governance controls inventory and reconciliation runbook.
-- [`docs/architecture.md`](file:///C:/Users/ATHARV/.gemini/antigravity/scratch/paymentpulse/docs/architecture.md): Technical architectural specification and scalability analysis.
-- [`docs/interview_guide.md`](file:///C:/Users/ATHARV/.gemini/antigravity/scratch/paymentpulse/docs/interview_guide.md): Technical Q&A defending every architectural and payments domain decision.
+- [`docs/requirements.md`](docs/requirements.md): Stakeholder specifications (FR-01 through FR-06).
+- [`docs/domain_model.md`](docs/domain_model.md): Entity relationship diagram and payment state lifecycle.
+- [`docs/data_dictionary.md`](docs/data_dictionary.md): Comprehensive schema dictionary across Bronze, Silver, and Gold.
+- [`docs/data_controls.md`](docs/data_controls.md): Detailed governance controls inventory and reconciliation runbook.
+- [`docs/architecture.md`](docs/architecture.md): Technical architectural specification and scalability analysis.
+- [`docs/interview_guide.md`](docs/interview_guide.md): Technical Q&A defending every architectural and payments domain decision.

@@ -82,9 +82,7 @@ class AnomalyRiskModel:
         result_df = df.copy()
         result_df["risk_score"] = risk_scores
 
-        # Risk-policy tiers based on calibrated score thresholds.
-        # Thresholds are configurable and should be tuned against labeled outcomes
-        # if production ground truth becomes available.
+        # Risk-policy tiers based on calibrated score thresholds; tune against labeled outcomes when available.
         result_df["risk_tier"] = pd.cut(
             result_df["risk_score"],
             bins=[-float("inf"), 45.0, 75.0, float("inf")],

@@ -10,9 +10,9 @@ student transacting from an unfamiliar country is anomalous.
 
 Engineered features:
   1. amount: The transaction amount.
-  2. customer_avg_amount: Historical mean transaction amount for this customer.
+  2. customer_avg_amount: Customer-level mean transaction amount baseline.
   3. amount_ratio: amount / (customer_avg_amount + 1e-5). Ratio of current amount to customer mean.
-  4. customer_txn_count: Total historical transaction frequency of this customer.
+  4. customer_txn_count: Total transaction frequency for this customer in the curated dataset.
   5. merchant_failure_rate: Proportion of failures associated with this merchant.
   6. is_weekend: Binary flag indicating weekend transaction.
   7. hour_of_day: Intraday hour (0–23).

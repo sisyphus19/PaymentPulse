@@ -1,13 +1,14 @@
 """
 PaymentPulse — End-to-End Pipeline Orchestrator
 ================================================
-Runs all Tier 1 pipeline stages in sequence:
+Runs all PaymentPulse pipeline stages in sequence:
   1. Generate synthetic data
   2. Ingest raw CSVs into Bronze
   3. Transform Bronze → Silver → Gold
   4. Run data-quality checks
   5. Run data controls
-  6. Print a run summary
+  6. Score transaction risk
+  7. Print a run summary
 
 This script is the single entry point for running the full pipeline locally.
 It is deliberately simple — one function per stage, called in order.
@@ -36,6 +37,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 from paymentpulse.controls.controls import run_controls
 from paymentpulse.generator.generate import generate
 from paymentpulse.ingestion.ingest import ingest
+from paymentpulse.risk.score import run_risk_scoring
 from paymentpulse.quality.checks import run_dq_checks
 from paymentpulse.utils.logger import get_logger
 from paymentpulse.warehouse.warehouse import build_warehouse
@@ -107,13 +109,24 @@ def run_pipeline(config_path: str = "config/config.yaml") -> None:
     )
 
     # ── Stage 5: Controls ─────────────────────────────────────────────────
-    log.info("STAGE 5/5: Running data controls")
+    log.info("STAGE 5/6: Running data controls")
     t0 = time.monotonic()
     ctrl_result = run_controls(batch_id=batch_id, config_path=config_path)
     log.info(
         "  [OK] Controls: %s | PASS=%d | FAIL=%d | %.2fs",
         ctrl_result["overall_status"],
         ctrl_result["pass_count"], ctrl_result["fail_count"],
+        time.monotonic() - t0,
+    )
+
+    # ── Stage 6: ML risk scoring ─────────────────────────────────────────
+    log.info("STAGE 6/6: Running transaction risk scoring")
+    t0 = time.monotonic()
+    risk_result = run_risk_scoring(config_path=config_path)
+    log.info(
+        "  [OK] Risk model | scored=%d | HIGH=%d | MEDIUM=%d | LOW=%d | %.2fs",
+        risk_result["total_scored"], risk_result["high_risk"],
+        risk_result["medium_risk"], risk_result["low_risk"],
         time.monotonic() - t0,
     )
 
@@ -134,6 +147,8 @@ def run_pipeline(config_path: str = "config/config.yaml") -> None:
     log.info("  Controls overall : %s (%d PASS, %d FAIL)",
              ctrl_result["overall_status"],
              ctrl_result["pass_count"], ctrl_result["fail_count"])
+    log.info("  Risk high/med/low : %d/%d/%d",
+             risk_result["high_risk"], risk_result["medium_risk"], risk_result["low_risk"])
     log.info("  Database         : data/paymentpulse.duckdb")
     log.info("=" * 70)
 
