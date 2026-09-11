@@ -201,21 +201,7 @@ For MLOps training/validation, see `mlops/README.md`.
 
 ---
 
-## 10. Alignment with Barclays / MLOps & Data Quality Roles
-
-| Barclays JD Requirement | Evidence in PaymentPulse (Tier 1) |
-|---|---|
-| **Data Integration & Pipelines** | Automated end-to-end Python pipeline from raw landing to Medallion warehouse with schema validation. |
-| **SQL & Dimensional Modeling** | ANSI-standard Star Schema (`fact_transactions`, `dim_customer`, `dim_merchant`, etc.) with 10 business analytics queries. |
-| **Payments Domain Expertise** | Complete payment lifecycle modeling (INITIATED, SUCCESS, FAILED, PENDING, REVERSED), payment rail segmentation, and risk metrics. |
-| **Data Quality & Governance** | 14-point DQ framework with PASS/WARN/FAIL scoring and 7 financial-grade data controls with zero-delta reconciliation. |
-| **Testing & SDLC** | 52 passing pytest tests, clean ruff linting, structured UTC logging, and comprehensive documentation (`docs/`). |
-| **Cloud / MLOps Target Architecture** | AWS S3, SageMaker Pipelines/Training, Step Functions, Lambda and CloudWatch design artifacts; local execution remains cloud-independent. |
-| **ML Lifecycle** | Isolation Forest risk model, MLflow tracking, deployment validation gate, Docker packaging, CI workflow, and PSI-based drift monitoring. |
-
----
-
-## 11. Repository Documentation Index
+## 10. Repository Documentation Index
 
 - [`docs/requirements.md`](docs/requirements.md): Stakeholder specifications (FR-01 through FR-06).
 - [`docs/domain_model.md`](docs/domain_model.md): Entity relationship diagram and payment state lifecycle.
