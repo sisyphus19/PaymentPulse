@@ -24,10 +24,9 @@ are designed so they can be called independently.
 from __future__ import annotations
 
 import argparse
-import json
 import sys
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 # ── Make src importable when run as a script ─────────────────────────────────
@@ -37,8 +36,8 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 from paymentpulse.controls.controls import run_controls
 from paymentpulse.generator.generate import generate
 from paymentpulse.ingestion.ingest import ingest
-from paymentpulse.risk.score import run_risk_scoring
 from paymentpulse.quality.checks import run_dq_checks
+from paymentpulse.risk.score import run_risk_scoring
 from paymentpulse.utils.logger import get_logger
 from paymentpulse.warehouse.warehouse import build_warehouse
 
@@ -48,7 +47,7 @@ log = get_logger("pipeline")
 def run_pipeline(config_path: str = "config/config.yaml") -> None:
     """Execute the full Tier 1 PaymentPulse pipeline."""
     pipeline_start = time.monotonic()
-    run_ts = datetime.now(timezone.utc).isoformat()
+    run_ts = datetime.now(UTC).isoformat()
     log.info("=" * 70)
     log.info("PaymentPulse Pipeline — Tier 1 | Started at %s", run_ts)
     log.info("=" * 70)

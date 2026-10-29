@@ -26,7 +26,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from paymentpulse.risk.features import extract_features  # noqa: E402
-from paymentpulse.risk.model import AnomalyRiskModel, FEATURE_COLS  # noqa: E402
+from paymentpulse.risk.model import FEATURE_COLS, AnomalyRiskModel  # noqa: E402
 
 
 def train(config_path: str = "config/config.yaml", use_mlflow: bool = False) -> dict:

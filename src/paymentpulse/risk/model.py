@@ -15,8 +15,6 @@ Why Isolation Forest:
 
 from __future__ import annotations
 
-from typing import Any
-
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import IsolationForest
@@ -61,13 +59,13 @@ class AnomalyRiskModel:
             DataFrame with 'anomaly_score', 'risk_score' (0-100), and 'risk_tier' (LOW/MEDIUM/HIGH).
         """
         log.info("Fitting Isolation Forest model on %d records...", len(df))
-        X = df[FEATURE_COLS].fillna(0)
+        x = df[FEATURE_COLS].fillna(0)
 
-        self.model.fit(X)
+        self.model.fit(x)
         self.is_fitted = True
 
         # raw score: lower means more anomalous
-        raw_scores = self.model.score_samples(X)
+        raw_scores = self.model.score_samples(x)
 
         # Invert and calibrate raw score to 0–100 range
         # Isolation Forest score_samples is roughly in [-0.8, -0.2]

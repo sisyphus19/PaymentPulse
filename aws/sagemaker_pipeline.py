@@ -11,12 +11,12 @@ import os
 
 def build_pipeline():
     try:
-        from sagemaker.workflow.pipeline import Pipeline
-        from sagemaker.workflow.parameters import ParameterString
-        from sagemaker.workflow.steps import ProcessingStep, TrainingStep
-        from sagemaker.sklearn.processing import SKLearnProcessor
-        from sagemaker.sklearn.estimator import SKLearn
         from sagemaker.processing import ProcessingInput, ProcessingOutput
+        from sagemaker.sklearn.estimator import SKLearn
+        from sagemaker.sklearn.processing import SKLearnProcessor
+        from sagemaker.workflow.parameters import ParameterString
+        from sagemaker.workflow.pipeline import Pipeline
+        from sagemaker.workflow.steps import ProcessingStep, TrainingStep
     except ImportError as exc:
         raise RuntimeError("Install AWS dependencies with: pip install -e '.[aws]'") from exc
 
