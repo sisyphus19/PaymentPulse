@@ -1,0 +1,32 @@
+name: PaymentPulse CI
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+
+jobs:
+  test-and-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install
+        run: pip install -e ".[dev]"
+      - name: Lint
+        run: ruff check .
+      - name: Tests
+        run: pytest tests/ -q
+      - name: Run end-to-end pipeline
+        run: python pipelines/run_pipeline.py
+      - name: Train risk model and run the validation gate
+        run: |
+          python mlops/train.py
+          python mlops/validate.py
+      - name: Drift monitor (build reference, compare current)
+        run: |
+          python mlops/monitor.py --build-reference --reference artifacts/reference_profile.json
+          python mlops/monitor.py --reference artifacts/reference_profile.json

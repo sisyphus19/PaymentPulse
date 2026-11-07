@@ -1,0 +1,28 @@
+name: 'paymentpulse_dbt'
+version: '1.0.0'
+config-version: 2
+
+profile: 'paymentpulse'
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+models:
+  paymentpulse_dbt:
+    staging:
+      +materialized: view
+      +schema: dbt_staging
+    intermediate:
+      +materialized: view
+      +schema: dbt_intermediate
+    marts:
+      +materialized: table
+      +schema: dbt_marts

@@ -1,0 +1,88 @@
+  - name: int_transaction_metrics
+    description: >
+      Daily transaction-level performance metrics derived from the curated
+      payment transaction dataset. Used as the analytical foundation for
+      payment performance reporting.
+
+    columns:
+      - name: date_sk
+        description: "Surrogate key representing the transaction date."
+        tests:
+          - not_null
+
+      - name: metric_date
+        description: "Calendar date for the transaction metrics."
+        tests:
+          - not_null
+          - unique
+
+      - name: total_transactions
+        description: "Total number of transactions recorded for the date."
+        tests:
+          - not_null
+
+      - name: successful_transactions
+        description: "Number of successfully completed transactions."
+        tests:
+          - not_null
+
+      - name: failed_transactions
+        description: "Number of failed transactions."
+        tests:
+          - not_null
+
+      - name: pending_transactions
+        description: "Number of transactions currently in pending status."
+        tests:
+          - not_null
+
+      - name: reversed_transactions
+        description: "Number of transactions subsequently reversed."
+        tests:
+          - not_null
+
+      - name: total_transaction_value
+        description: "Total monetary value of transactions for the date."
+        tests:
+          - not_null
+
+      - name: success_rate_pct
+        description: "Percentage of transactions that completed successfully."
+
+      - name: failure_rate_pct
+        description: "Percentage of transactions that failed."
+
+      - name: reversal_rate_pct
+        description: "Percentage of transactions that were reversed."
+
+
+  - name: payment_daily_metrics
+    description: >
+      Business-facing daily payment performance mart containing transaction
+      volume, value, success, failure and reversal KPIs.
+
+    columns:
+      - name: metric_date
+        description: "Date represented by the KPI record."
+        tests:
+          - not_null
+          - unique
+
+      - name: total_transactions
+        description: "Total transactions processed on the date."
+        tests:
+          - not_null
+
+      - name: total_volume_gbp
+        description: "Total transaction value for the date."
+        tests:
+          - not_null
+
+      - name: success_rate_pct
+        description: "Successful transaction percentage."
+
+      - name: failure_rate_pct
+        description: "Failed transaction percentage."
+
+      - name: reversal_rate_pct
+        description: "Reversed transaction percentage."
