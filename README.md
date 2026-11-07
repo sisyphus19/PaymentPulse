@@ -138,7 +138,11 @@ All figures below come from a successful local pipeline run.
 
 ### Automated Testing
 
+<<<<<<< HEAD
 The project includes **65 pytest tests** covering data generation, ingestion, data quality, controls, warehouse processing, risk scoring, and the MLOps drift monitor and validation gate. Linting is enforced with ruff. On every push, CI runs lint and tests, then the end-to-end pipeline, risk-model training, the validation gate, and the PSI drift monitor. CI does not build or run the Docker image.
+=======
+The project includes **52 pytest tests** covering data generation, ingestion, data quality, controls, warehouse processing, and risk scoring. Linting is enforced with ruff, and both run in CI on every push.
+>>>>>>> origin/main
 
 ---
 
@@ -169,6 +173,7 @@ PaymentPulse includes a transaction-level anomaly risk layer built on the curate
 - Generates human-readable risk explanations based on the characteristics driving each score.
 - Persists risk outputs for downstream analysis.
 
+<<<<<<< HEAD
 ### MLOps lifecycle (local)
 
 - `mlops/train.py` fits the Isolation Forest on the Silver features, writes `artifacts/risk_model/model.pkl` and `metadata.json`, and with `--mlflow` logs parameters, metrics and the model to a local MLflow store.
@@ -176,6 +181,8 @@ PaymentPulse includes a transaction-level anomaly risk layer built on the curate
 - `mlops/monitor.py` computes the Population Stability Index (PSI) per numeric feature against a saved reference profile (PSI >= 0.20 is flagged as drift). Comparing a dataset with itself gives PSI 0 by construction; the unit tests prove it flags an injected shift.
 - Details and commands: `mlops/README.md`. The `aws/` folder maps this lifecycle to SageMaker, Lambda and Step Functions as scaffolding only.
 
+=======
+>>>>>>> origin/main
 The model is unsupervised and the data is synthetic, so the scores illustrate the approach rather than measure real fraud-detection performance.
 
 ---
@@ -228,7 +235,11 @@ pip install -e ".[aws]"     # boto3, SageMaker
 | **SQL & Dimensional Modeling**   | ANSI SQL star schema (`fact_transactions`, `dim_customer`, `dim_merchant`, etc.) with 10 business analytics queries.                  |
 | **Payments Domain Knowledge**    | Payment lifecycle modeling (INITIATED, SUCCESS, FAILED, PENDING, REVERSED), rail segmentation, and risk metrics.                      |
 | **Data Quality & Governance**    | 14-point DQ framework with PASS/WARN/FAIL scoring, and 7 financial data controls including zero-delta reconciliation.                |
+<<<<<<< HEAD
 | **Testing & SDLC**               | 65 pytest tests, ruff linting, CI on every push, structured UTC logging, and documentation in `docs/`.                                |
+=======
+| **Testing & SDLC**               | 52 pytest tests, ruff linting, CI on every push, structured UTC logging, and documentation in `docs/`.                                |
+>>>>>>> origin/main
 | **Cloud / Target Architecture**  | Documented Snowflake/Databricks/dbt target design, with a clear separation between what runs locally and what is design-only.         |
 
 ---
@@ -240,6 +251,10 @@ pip install -e ".[aws]"     # boto3, SageMaker
 - `docs/data_dictionary.md`: Schema dictionary across Bronze, Silver, and Gold.
 - `docs/data_controls.md`: Governance controls inventory and reconciliation runbook.
 - `docs/architecture.md`: Technical architecture and scalability analysis.
+<<<<<<< HEAD
 - `docs/interview_guide.md`: Q&A on the main architectural and payments-domain decisions.
 - `docs/mlops_aws_architecture.md`: MLOps lifecycle and the AWS target mapping (design only).
 - `docs/snowflake_architecture.md`: Snowflake/dbt target design (not executed).
+=======
+- `docs/design_decisions.md`: Q&A on the main architectural and payments-domain decisions.
+>>>>>>> origin/main

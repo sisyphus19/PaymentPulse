@@ -34,11 +34,15 @@ Then compare a later batch:
 python mlops\monitor.py --reference artifacts\reference_profile.json
 ```
 
+<<<<<<< HEAD
 PSI >= 0.20 is treated as a drift signal by default. This is an operational threshold, not a fraud-performance metric. Comparing a dataset against a reference built from the same data returns PSI 0 by construction; `tests/unit/test_mlops.py` checks that an injected shift is flagged.
 
 ## What the validation gate does and does not check
 
 `validate.py` enforces operational guardrails on the training metadata (model type, row count, high-risk rate within 0.5%-10%, feature count). It does not measure detection accuracy, because the model is unsupervised and the data is synthetic.
+=======
+PSI >= 0.20 is treated as a drift signal by default. This is an operational threshold, not a fraud-performance metric.
+>>>>>>> origin/main
 
 ## AWS
 

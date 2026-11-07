@@ -58,5 +58,8 @@ Thumbs.db
 artifacts/
 mlops/artifacts/
 
+<<<<<<< HEAD
 mlruns/
 mlflow.db
+=======
+>>>>>>> origin/main
